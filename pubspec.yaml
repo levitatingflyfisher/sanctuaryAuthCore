@@ -1,0 +1,33 @@
+name: sanctuary_auth_core
+description: Ghost-tier identity primitives for the OpenHearth app suite.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  # SDK floor matches Lullaby's constraint (see plan Task 0.1).
+  # Lower to '>=3.5.0 <4.0.0' when the package is ready for external consumers.
+  sdk: '>=3.10.7 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Crypto
+  cryptography: ^2.7.0
+  cryptography_flutter: ^2.3.2
+  sodium: ^3.1.0
+  # BIP39
+  bip39_mnemonic: ^4.0.1
+  # Secure storage
+  flutter_secure_storage: ^9.2.2
+  # State
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.3.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.4.3
+  mocktail: ^1.0.4
