@@ -27,11 +27,17 @@ void main() {
       expect(keys.recoveryKey, hasLength(32));
     });
 
-    test('all three keys are distinct', () async {
+    test('all derived keys are distinct', () async {
       final keys = await KeyDerivation.fromSeed(fixedSeed);
       expect(keys.masterEncryptionKey, isNot(equals(keys.authKey)));
       expect(keys.masterEncryptionKey, isNot(equals(keys.recoveryKey)));
       expect(keys.authKey, isNot(equals(keys.recoveryKey)));
+      expect(keys.syncKey, isNot(equals(keys.masterEncryptionKey)),
+          reason: 'syncKey must be distinct so a nonce-reuse bug in one '
+              'encryption path cannot compromise the other');
+      expect(keys.syncKey, isNot(equals(keys.authKey)));
+      expect(keys.syncKey, isNot(equals(keys.recoveryKey)));
+      expect(keys.syncKey, hasLength(32));
     });
 
     test('derivation is deterministic for the same seed', () async {
@@ -91,6 +97,24 @@ void main() {
         _hex(keys.recoveryKey),
         '04203889b3fdf5f1b3073a9030246711eb39b8a6f361036cd173998d56e2dcfb',
         reason: 'recoveryKey drift — HKDF-SHA256 or info string changed',
+      );
+    });
+
+    test('known-answer vector: syncKey is deterministic '
+        '(HKDF-SHA256, info=openhearth.sync.encryption.v1)', () async {
+      // Pin: if this hex changes, the sync-encryption info string drifted
+      // and every device already in a sync group will fail to decrypt
+      // peer blobs on next sync.
+      const phrase =
+          'abandon abandon abandon abandon abandon abandon '
+          'abandon abandon abandon abandon abandon about';
+      final seed = await OpenHearthMnemonic.deriveSeed(phrase);
+      final keys = await KeyDerivation.fromSeed(seed);
+
+      expect(
+        _hex(keys.syncKey),
+        '9c34024d9a3a2f7e9537f66a180b9340011579f44bd974c118c9c2755a5770e9',
+        reason: 'syncKey drift — HKDF-SHA256 or info string changed',
       );
     });
   });
